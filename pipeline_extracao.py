@@ -117,36 +117,41 @@ def analyze_doc_image(img, text):
 # -------------------------------------------------------------------
 # Main pipeline
 # -------------------------------------------------------------------
-def pipeline(path_parcionados):
+def pipeline(path_parcionados, selected_file=None):
     files_path = path_parcionados
 
+    if not os.path.isdir(files_path):
+        raise FileNotFoundError(f"Pasta não encontrada: {files_path}")
+
     all_items = os.listdir(files_path)
-    files = [item for item in all_items if os.path.isfile(os.path.join(files_path, item))]
+    files = [item for item in all_items
+             if os.path.isfile(os.path.join(files_path, item)) and item.lower().endswith(".pdf")]
 
-    for idx, f in enumerate(files):
-        print(f"{idx}. {f}")
+    # Se vier um arquivo selecionado, processa só ele (verifica se existe)
+    if selected_file:
+        if selected_file not in files:
+            raise FileNotFoundError(f"Arquivo selecionado '{selected_file}' não encontrado em {files_path}")
+        files = [selected_file]
+    else:
+        print("Nenhum arquivo selecionado — processando todos os PDFs da pasta.")
 
-    try:
-        answer = int(input("Digite o número do documento que você quer processar:\n"))
-        files = [files[answer]]
-    except Exception as e:
-        print(f"ERROR ::: {e}")
-
+    now = datetime.now().strftime(r"%Y%m%dT%H%M%S")
     docs = []
 
     for f in files:
-        path = f"{files_path}/{f}"
+        path = os.path.join(files_path, f)
         doc = {"filename": f}
-        filename = f.split(".")[0]
+        filename = f.rsplit(".", 1)[0]
 
-        # Convert PDF
+        # Convert PDF -> imagens
         imgs = convert_doc_to_images(path)
+        # Extrai texto por página
         text = extract_text_by_page(path)
         pages_description = []
 
         print(f"Processando páginas do documento: {f}")
 
-        # Concurrent execution
+        # Execução concorrente (mantive seu padrão)
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
             futures = [executor.submit(analyze_doc_image, img, text[idx]) for idx, img in enumerate(imgs)]
 
@@ -162,23 +167,28 @@ def pipeline(path_parcionados):
         docs.append(doc)
 
         # Save raw results
-        raw_path = f'./json_results/raw/raw_{filename}_{now}.json'
+        raw_dir = "./json_results/raw"
+        os.makedirs(raw_dir, exist_ok=True)
+        raw_path = os.path.join(raw_dir, f"raw_{filename}_{now}.json")
         with open(raw_path, "w", encoding="utf-8") as file:
             json.dump(docs, file, ensure_ascii=False, indent=2)
 
-        print(f"raw_{filename}_{now}.json salvo com sucesso em {raw_path}")
+        print(f"{os.path.basename(raw_path)} salvo com sucesso em {raw_path.replace("\\", "/")}")
 
         time.sleep(10)
 
         with open(raw_path, "r", encoding="utf8") as file:
             json_parcial = file.read()
 
-        stg_json = pproc(pproc_prompt, path, json_parcial)
+        stg_json = pproc(pproc_prompt, path, json_parcial)  # pproc_prompt e pproc devem existir no módulo
 
         final_json = json.loads(stg_json)
 
-        bronze_path = f"./json_results/bronze/bronze_{filename}_{now}.json"
+        bronze_dir = "./json_results/bronze"
+        os.makedirs(bronze_dir, exist_ok=True)
+        bronze_path = os.path.join(bronze_dir, f"bronze_{filename}_{now}.json")
         with open(bronze_path, "w", encoding="utf8") as r:
             json.dump(final_json, r, ensure_ascii=False)
 
-        print(f"bronze_{filename}_{now}.json salvo com sucesso em {bronze_path}")
+        print(f"{os.path.basename(bronze_path)} salvo com sucesso em {bronze_path.replace("\\", "/")}")
+
