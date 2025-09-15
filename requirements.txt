@@ -1,0 +1,6 @@
+pdf2image
+pdfminer.six
+tqdm
+openai
+pypdf
+python-dotenv

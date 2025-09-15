@@ -1,0 +1,226 @@
+{
+    "general_information": {
+        "machine_serial_number": "FQ12Z007C",
+        "machine_manufacturer": "SACMI",
+        "machine_type": "Machine Operating Instructions",
+        "document_type": "Operating Instructions"
+    },
+    "operating_instructions": {
+        "user_interface": {
+            "description": "Operator interface includes:",
+            "components": [
+                "Control panel",
+                "Push-button panel",
+                "Mobile control device"
+            ],
+            "notice": "The information regarding the programming and use of the control panel is given in the document INSTRUCTIONS B.",
+            "image": true
+        },
+        "pushbutton_panel": {
+            "buttons": [
+                {
+                    "id": 1,
+                    "description": "EMERGENCY",
+                    "morphology": "Mushroom head push button (red)",
+                    "function": "Pressed: it immediately STOPS the machine"
+                },
+                {
+                    "id": 2,
+                    "description": "RESET",
+                    "morphology": "Backlighted push button (blue)",
+                    "function": "The flashing illumination of the indicator indicates the detection of one or more faults. When it is pressed for a few seconds it executes machine reset and alarms restoration (the machine is powered and the power units are restored). Blinking button goes off."
+                },
+                {
+                    "id": 3,
+                    "description": "START CYCLE MANUAL",
+                    "morphology": "Lit push button (white)",
+                    "function": "Flashing light signals that button is active. Pressed simultaneously with “AB-Key” button starts the selected manual cycle. The button stays lit."
+                },
+                {
+                    "id": 4,
+                    "description": "CYCLE STOPS",
+                    "morphology": "Black push button",
+                    "function": "Pressed: it allows machine timed STOPPAGE at the end of the movements in progress."
+                },
+                {
+                    "id": 5,
+                    "description": "START CYCLE",
+                    "morphology": "Lit push button (white)",
+                    "function": "Pressed: it starts automatic cycle."
+                },
+                {
+                    "id": 6,
+                    "description": "RELEASE GUARDS BLOWER",
+                    "morphology": "Lit push button (white)",
+                    "function": "When this key is pressed, it causes sending machine safety guard locks unlocking request. When light is STEADY, it indicates that safety guard is closed, but not locked (lockable). When light is OFF, it indicates that safety guard is closed and locked (unlockable). FAST flashing light indicates that the safety guard is being locked/unlocked. SLOW flashing light indicates that the button is active."
+                },
+                {
+                    "id": 7,
+                    "description": "MACHINE MANAGEMENT",
+                    "morphology": "Key selector (2 positions)",
+                    "function": "It allows to select blow molding machine operation independently (STAND ALONE) or in combination with filling machine (COMBO). In COMBO mode, blow molding machine and filling machine automatic cycle start-up and stoppage are controlled respectively by buttons 12-13."
+                },
+                {
+                    "id": 8,
+                    "description": "OPERATION",
+                    "morphology": "Key selector (2 positions)",
+                    "function": "Used to define whether the machine is in 'maintenance' mode (ON) or in 'automatic' or 'manual' mode (OFF)."
+                },
+                {
+                    "id": 9,
+                    "description": "AB-KEY",
+                    "morphology": "Lit push button (white)",
+                    "function": "Pressing this key enables different types of operations, activated only by pressing a second button, either this physical or represented on the operator interface. Selector switch 8 set to “ON”: pressed at the same time with button 3, it starts the selected manual cycle. Selector switch 8 set to “OFF”: pressed at the same time with button 3, it controls timed start-up of all blow molding machine axes. Selector switch 8 set to “OFF”: pressed together with start-up button displayed in the pop-up window that appears on the screen, it commands the previously selected area to be started manually."
+                },
+                {
+                    "id": 10,
+                    "description": "TRANSPONDER KEY",
+                    "morphology": "By approaching this receiver, a 'transponder' key allows you to automatically log in"
+                },
+                {
+                    "id": 11,
+                    "description": "FILLING MACHINE/ COMBO CYCLE STOPPAGE",
+                    "morphology": "Black push button",
+                    "function": "Pressed: It allows filling machine timed STOPPAGE at the end of the movements in progress. If selector switch 7 is turned to 'COMBO' mode, it stops automatic cycle of both the filling machine and the blow molding machine at the end of the movements in progress."
+                },
+                {
+                    "id": 12,
+                    "description": "FILLING MACHINE/ COMBO CYCLE START-UP",
+                    "morphology": "Lit push button (white)",
+                    "function": "Pressed: It STARTS machine functioning. If selector switch 7 is turned to 'COMBO' mode, it starts automatic cycle of both the filling machine and the blow molding machine."
+                },
+                {
+                    "id": 13,
+                    "description": "UNLOCKING FILLING MACHINE SAFETY GUARDS",
+                    "morphology": "Lit push button (white)",
+                    "function": "When this key is pressed, it causes sending machine safety guard locks unlocking request. When light is STEADY, it indicates that safety guard is closed, but not locked (lockable). When light is OFF, it indicates that safety guard is closed and locked (unlockable). FAST flashing light indicates that the safety guard is being locked/unlocked. SLOW flashing light indicates that the button is active."
+                },
+                {
+                    "id": 14,
+                    "description": "FILLING MACHINE MAINTENANCE",
+                    "morphology": "Key selector (2 positions)",
+                    "function": "Used to define whether the machine is in 'maintenance' mode (ON) or in 'automatic' or 'manual' mode (OFF)."
+                }
+            ],
+            "image": true
+        },
+        "mobile_control_device": {
+            "description": "The mobile control device (jog) is used for maintenance and/or size change-over operations at controlled and safe speed with safety guards open.",
+            "notice": [
+                "Adjustments are not allowed on moving parts, not even with the use of the mobile control device.",
+                "The mobile control device operates, only if the dedicated safety guard is open. Speed in jog mode cannot exceed 3% of maximum speed. Devices location is indicated in the attached LAYOUT document."
+            ],
+            "activate_device": "To activate the device, turn OPERATION selector switch on push-button panel to SET-UP.",
+            "button_1": {
+                "positions": [
+                    "fully released: operations are NOT allowed",
+                    "intermediate position: running condition",
+                    "fully pressed: panic emergency; reaching the panic position is seen as an anomaly and requires a reset"
+                ]
+            },
+            "button_2": "allows emergency stop",
+            "image": true
+        },
+        "run_stop": {
+            "run": {
+                "conditions": [
+                    "If the safety and operating conditions are met:",
+                    "Press RESET key on push-button panel to enable safety guards locking and allow start-up.",
+                    "Press CYCLE START key on push-button panel to turn machine on."
+                ]
+            },
+            "jog_mode": {
+                "conditions": [
+                    "If the safety and operating conditions are met:",
+                    "Select jog mode operation.",
+                    "Press RESET key on push-button panel to enable safety guards locking.",
+                    "Press START key on the mobile push-button panel to turn machine on."
+                ]
+            },
+            "stop": [
+                "Wait until all the containers are out of the machine, then press CYCLE STOP key on push-button panel to stop the machine."
+            ],
+            "emergency_stop": [
+                "The emergency stop can be activated with the special buttons or by the display of fault messages that cause the machine to shut down.",
+                "Deactivate the emergency stop button or identify and remove the cause of the activation of the safety device; clear the faults."
+            ]
+        },
+        "cleaning": {
+            "cleaning_with_broken_bottle_container": {
+                "image": true,
+                "instructions": [
+                    "Stop the machine.",
+                    "Remove any residues of broken bottles/containers.",
+                    "Clean the machine base with a damp cloth and dry it with compressed air.",
+                    "Clean the sensors, photocells and reflectors delicately, making sure not to move or damage them."
+                ],
+                "caution": "Use adequate protective equipment (safety gloves, pliers, etc.), when filling glass bottles/containers."
+            },
+            "cip_washing": {
+                "description": "The machine is provided with a CIP washing device that is intended for washing and sanitizing the parts in contact with the filling liquid.",
+                "types_of_washing": [
+                    "RINSE ONLY: consists of a simple washing with water",
+                    "SANITATION: consists of a complete washing of the plant with the use of a washing product",
+                    "FLOODING: consists of filling all machines with an appropriate cleaning solution to keep them clean during periods of inactivity (i.e. at night or on weekends). The filling can only be carried out after sanitizing the system."
+                ],
+                "sanitation": {
+                    "description": "The machine sanitation cycle is defined as the succession of stages of washing, rinsing and drainage in the manner and time required to ensure complete cleaning of the filler and the dramatic reduction of microbial load and varies depending on many parameters, such as the type of filled product, the type of plant, environmental conditions (higher temperatures require more frequent sanitations) modes of use of the filling line.",
+                    "cycles": [
+                        "3 steps (ref.1-3, usually used for frequent washing and sanitization cycles, occasionally alternated with 5 steps)",
+                        "5 steps (ref.1-5, for more complete sanitization cycle services)",
+                        "7 steps (ref.1-7, for sanitization cycle services after bottling of more problematic products (i.e. milk-based)"
+                    ],
+                    "steps": [
+                        "In the case of hot filling, perform initial rinsing at the temperature used for filling the product and then gradually decrease it until the mains temperature is reached. If the filling is cold, simply rinse at the mains temperature.",
+                        "Carry out a cycle with soda (1.5%-2% at 80°-85°C) to permanently eliminate product residues left after rinsing.",
+                        "Perform a rinse cycle with water at mains temperature until the soda (or acid) is completely eliminated.",
+                        "Carry out a cycle with acid (usually nitric 1% at 30°C or phosphoric max 1% at 30°C) or with sanitizer (PAA-based chemical such as P3 -Oxonia or Divosan Mezzo).",
+                        "Carry out a new cycle with soda (1.5%-2% at 80°-85°C).",
+                        "Perform a cycle with sanitizer (PAA-based chemical such as P3 -Oxonia or Divosan Mezzo).",
+                        "Once the cycle with acid or sanitizer has been completed, perform a final rinse with water at mains temperature. This rinse will continue until acid or sanitizer value corresponds to that decided by the customer."
+                    ],
+                    "image": true
+                }
+            },
+            "cop_washing": {
+                "description": "The machine can be equipped with the COP washing system, which allows the machine to be washed externally automatically.",
+                "image": true
+            },
+            "washing_products": [
+                {
+                    "product": "Caustic Soda (NaOH)",
+                    "concentration": "2%",
+                    "temperature": "80 °C",
+                    "duration": "30 minutes"
+                },
+                {
+                    "product": "Nitric Acid (HNO3)",
+                    "concentration": "1%",
+                    "temperature": "30 °C",
+                    "duration": "20 minutes"
+                },
+                {
+                    "product": "Phosphoric Acid (H3PO4)",
+                    "concentration": "1%",
+                    "temperature": "30 °C",
+                    "duration": "20 minutes"
+                },
+                {
+                    "product": "PAA Solution",
+                    "concentration": "250 - 300 ppm",
+                    "temperature": "20 °C",
+                    "duration": "20 minutes"
+                },
+                {
+                    "product": "Hot Water",
+                    "temperature": "95°C",
+                    "duration": "45 minutes"
+                }
+            ],
+            "safety_instructions": {
+                "description": "Dangerous substances (acids, soda, etc.) are used during sanitation cycles and dangerous temperatures are reached. Always take all appropriate precautions.",
+                "instructions": "In the event of accidental contact with the sanitising products, rinse thoroughly with water or, if available, with detergent substances provided. In any case, immediately consult a doctor."
+            }
+        }
+    }
+}
