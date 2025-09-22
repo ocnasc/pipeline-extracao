@@ -175,7 +175,7 @@ def pipeline(path_parcionados, selected_file=None):
 
         print(f"{os.path.basename(raw_path)} salvo com sucesso em {raw_path.replace("\\", "/")}")
 
-        time.sleep(10)
+        time.sleep(20)
 
         with open(raw_path, "r", encoding="utf8") as file:
             json_parcial = file.read()
