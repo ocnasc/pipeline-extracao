@@ -57,7 +57,7 @@ def executar():
             filename_override = entry_filename.get().strip()
 
             if not file_choice:
-                messagebox.showerror("Erro", "Selecione um arquivo local para enviar (./json_results/gold).")
+                messagebox.showerror("Erro", "Selecione um arquivo local para enviar (../assets/json_results/gold).")
                 return
 
             # se não informou filename_override usa o nome original do arquivo selecionado
@@ -74,7 +74,7 @@ def executar():
             else:
                 key = filename
 
-            folder_local = "./json_results/gold"
+            folder_local = "../assets/json_results/gold"
             filepath = os.path.join(folder_local, file_choice)
 
             if not os.path.isfile(filepath):
@@ -131,7 +131,7 @@ def atualizar_lista_pdfs(folder):
 def atualizar_lista_json():
     combo_files_s3.set("")
     combo_files_s3["values"] = []
-    folder = "./json_results/gold"
+    folder = "../assets/json_results/gold"
     if os.path.isdir(folder):
         # lista apenas arquivos regulares; filtra por extensões comuns (.json)
         files = [f for f in os.listdir(folder)
@@ -232,7 +232,7 @@ ttk.Label(frame_s3, text="Pasta no S3 (dentro do bucket) - ex: 'clientes/2023':"
 entry_s3_folder = ttk.Entry(frame_s3, width=48)
 entry_s3_folder.grid(row=0, column=1, padx=5, pady=4)
 
-ttk.Label(frame_s3, text="Arquivo local (./json_results/gold):").grid(row=1, column=0, sticky="w", pady=4)
+ttk.Label(frame_s3, text="Arquivo local (../assets/json_results/gold):").grid(row=1, column=0, sticky="w", pady=4)
 combo_files_s3 = ttk.Combobox(frame_s3, width=48, state="readonly")
 combo_files_s3.grid(row=1, column=1, padx=5, pady=4)
 combo_files_s3.bind("<<ComboboxSelected>>", on_json_selected)
