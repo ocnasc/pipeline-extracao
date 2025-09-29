@@ -5,7 +5,7 @@
 
 from pdf2image import convert_from_path
 import base64
-import pymupdf
+import fitz  # PyMuPDF (corrigido: "import pymupdf" pode dar erro)
 from dotenv import load_dotenv
 import concurrent.futures
 import os
@@ -16,6 +16,10 @@ import json
 from datetime import datetime
 from prompts import *
 import time
+import tiktoken
+import random
+from openai import RateLimitError, APIError
+from pathlib import Path
 
 # -------------------------------------------------------------------
 # Setup
@@ -26,12 +30,46 @@ api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 
+ANALYSIS_MODEL_DEFAULT = "gpt-4.1"#"gpt-4o-mini"
+ANALYSIS_MODEL_LARGE = "gpt-4.1"
+PPROC_MODEL = "gpt-5-mini"
+
 # -------------------------------------------------------------------
-# Functions: PDF to images & text
+# Utility Functions
 # -------------------------------------------------------------------
+def create_directories():
+    diretorios = [
+    Path("../assets/json_results/raw"),
+    Path("../assets/json_results/bronze"),
+    Path("../assets/json_results/silver"),
+    Path("../assets/json_results/gold"),
+    Path("../assets/pdfs/brutos"),
+    Path("../assets/pdfs/parcionados"),
+    ]
+
+    for d in diretorios:
+        d.mkdir(parents=True, exist_ok=True)  # cria se não existir
+        print(f"Diretório verificado/criado: {d}")
+
+
+
+
+def count_tokens(model, text):
+    enc = tiktoken.encoding_for_model(model)
+    return len(enc.encode(text))
+
+
+def estimate_total_tokens(model, texts, num_images):
+    """Estima tokens considerando apenas 1 vez o prompt base e aplicando margem de segurança."""
+    total = count_tokens(model, analysis_prompt)  # só uma vez
+    for t in texts:
+        total += count_tokens(model, t)           # texto da página
+        total += 85                               # custo médio por imagem
+    return int(total * 1.2)  # margem de 20%
+
+
 def convert_doc_to_images(path):
-    images = convert_from_path(path)
-    return images
+    return convert_from_path(path)
 
 
 def get_img_uri(img):
@@ -39,21 +77,49 @@ def get_img_uri(img):
     img.save(png_buffer, format="PNG")
     png_buffer.seek(0)
     base64_png = base64.b64encode(png_buffer.read()).decode("utf-8")
-    data_uri = f"data:image/png;base64,{base64_png}"
-    return data_uri
+    return f"data:image/png;base64,{base64_png}"
 
 
 def extract_text_by_page(path):
-    with pymupdf.open(path) as doc:
-        texts = [page.get_text("text") for page in doc]
-    return texts
+    with fitz.open(path) as doc:
+        return [page.get_text("text") for page in doc]
+
+
+def load_safe_json(raw_str):
+    """Valida e corrige JSON malformatado retornado pela IA."""
+    try:
+        return json.loads(raw_str)
+    except json.JSONDecodeError as e:
+        print(f"⚠️ JSON inválido: {e}")
+        cleaned = raw_str.strip().replace("```json", "").replace("```", "")
+        try:
+            return json.loads(cleaned)
+        except Exception as e2:
+            print(f"❌ Falhou ao corrigir JSON: {e2}")
+            return {"error": "invalid_json", "raw": cleaned}
+
+
+def split_list(lst, n):
+    """Divide lista em blocos de tamanho n."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
 
 
 # -------------------------------------------------------------------
 # Processing functions
 # -------------------------------------------------------------------
-def pproc(pproc_prompt, path, json_str):
+def safe_pproc(pproc_prompt, path, json_str, retries=3):
+    backoff = 5
+    for attempt in range(retries):
+        try:
+            return pproc(pproc_prompt, path, json_str)
+        except (RateLimitError, APIError) as e:
+            wait = backoff * (2 ** attempt) + random.uniform(0, 2)
+            print(f"⚠️ Erro no pproc: {e}. Retentando em {wait:.1f}s...")
+            time.sleep(wait)
+    raise RuntimeError("❌ pproc falhou após várias tentativas")
 
+def pproc(pproc_prompt, path, json_str):
     print(f"Processando arquivo {path}")
 
     file = client.files.create(
@@ -69,7 +135,7 @@ def pproc(pproc_prompt, path, json_str):
     )
 
     response = client.responses.create(
-        model="gpt-4o",
+        model=PPROC_MODEL,
         input=[
             {
                 "role": "user",
@@ -80,23 +146,27 @@ def pproc(pproc_prompt, path, json_str):
             }
         ],
     )
-    data = (
-        str(response.output[0].content[0].text)
-        .replace("```json", "")
-        .replace("```", "")
-    )
-    return data
+    if PPROC_MODEL == "gpt-5-mini":
+        return response.output_text.replace("```json", "").replace("```", "")
+    else:
+        return str(response.output[0].content[0].text).replace("```json", "").replace("```", "")
 
 
-def analyze_image(data_uri, text):
+def analyze_doc_image(img, text, model=ANALYSIS_MODEL_DEFAULT):
+    img_uri = get_img_uri(img)
+    return analyze_image(img_uri, text, model)
+
+
+def analyze_image(data_uri, text, model=ANALYSIS_MODEL_DEFAULT):
+    """Analisa imagem + texto (sem retries automáticos)."""
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model=model,
         messages=[
             {"role": "system", "content": analysis_prompt},
             {
                 "role": "user",
                 "content": [
-                    {"type": "image_url", "image_url": {"url": f"{data_uri}"}},
+                    {"type": "image_url", "image_url": {"url": data_uri}},
                     {"type": "text", "text": text},
                 ],
             },
@@ -107,27 +177,21 @@ def analyze_image(data_uri, text):
     )
     return response.choices[0].message.content
 
-
-def analyze_doc_image(img, text):
-    img_uri = get_img_uri(img)
-    data = analyze_image(img_uri, text)
-    return data
-
-
 # -------------------------------------------------------------------
 # Main pipeline
 # -------------------------------------------------------------------
-def pipeline(path_parcionados, selected_file=None):
+def pipeline(path_parcionados, selected_file=None, chunk_size=10):
+
+    create_directories()
+
     files_path = path_parcionados
 
     if not os.path.isdir(files_path):
         raise FileNotFoundError(f"Pasta não encontrada: {files_path}")
 
     all_items = os.listdir(files_path)
-    files = [item for item in all_items
-             if os.path.isfile(os.path.join(files_path, item)) and item.lower().endswith(".pdf")]
+    files = [item for item in all_items if os.path.isfile(os.path.join(files_path, item)) and item.lower().endswith(".pdf")]
 
-    # Se vier um arquivo selecionado, processa só ele (verifica se existe)
     if selected_file:
         if selected_file not in files:
             raise FileNotFoundError(f"Arquivo selecionado '{selected_file}' não encontrado em {files_path}")
@@ -143,52 +207,61 @@ def pipeline(path_parcionados, selected_file=None):
         doc = {"filename": f}
         filename = f.rsplit(".", 1)[0]
 
-        # Convert PDF -> imagens
         imgs = convert_doc_to_images(path)
-        # Extrai texto por página
         text = extract_text_by_page(path)
         pages_description = []
 
         print(f"Processando páginas do documento: {f}")
 
-        # Execução concorrente (mantive seu padrão)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-            futures = [executor.submit(analyze_doc_image, img, text[idx]) for idx, img in enumerate(imgs)]
 
-            with tqdm(total=len(imgs)) as pbar:
-                for _ in concurrent.futures.as_completed(futures):
-                    pbar.update(1)
 
-            for future in futures:
-                res = future.result()
-                pages_description.append(res)
+        chosen_model = ANALYSIS_MODEL_LARGE
+        # estimated_tokens = estimate_total_tokens(ANALYSIS_MODEL_DEFAULT, text, len(imgs))
+
+        # if estimated_tokens > 200_000:
+        #     chosen_model = ANALYSIS_MODEL_LARGE
+        #     print(f"⚠️ Estimado {estimated_tokens} tokens, trocando para {chosen_model}")
+        # else:
+        #     chosen_model = ANALYSIS_MODEL_DEFAULT
+        #     print(f"✅ Estimado {estimated_tokens} tokens, mantendo {chosen_model}")
+
+        # Processamento em blocos (chunk_size páginas de cada vez)
+
+
+
+        for chunk in split_list(list(enumerate(imgs)), chunk_size):
+            with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+                futures = [executor.submit(analyze_doc_image, img, text[idx], chosen_model) for idx, img in chunk]
+
+                with tqdm(total=len(chunk)) as pbar:
+                    for _ in concurrent.futures.as_completed(futures):
+                        pbar.update(1)
+
+                for future in futures:
+                    pages_description.append(future.result())
 
         doc["pages_description"] = pages_description
         docs.append(doc)
 
         # Save raw results
-        raw_dir = "./json_results/raw"
+        raw_dir = "../assets/json_results/raw"
         os.makedirs(raw_dir, exist_ok=True)
         raw_path = os.path.join(raw_dir, f"raw_{filename}_{now}.json")
         with open(raw_path, "w", encoding="utf-8") as file:
             json.dump(docs, file, ensure_ascii=False, indent=2)
 
-        print(f"{os.path.basename(raw_path)} salvo com sucesso em {raw_path.replace("\\", "/")}")
-
-        time.sleep(20)
+        print(f"{os.path.basename(raw_path)} salvo com sucesso em {os.path.normpath(raw_path)}")
 
         with open(raw_path, "r", encoding="utf8") as file:
             json_parcial = file.read()
 
-        stg_json = pproc(pproc_prompt, path, json_parcial)  # pproc_prompt e pproc devem existir no módulo
+        stg_json = pproc(pproc_prompt, path, json_parcial)
+        final_json = load_safe_json(stg_json)
 
-        final_json = json.loads(stg_json)
-
-        bronze_dir = "./json_results/bronze"
+        bronze_dir = "../assets/json_results/bronze"
         os.makedirs(bronze_dir, exist_ok=True)
         bronze_path = os.path.join(bronze_dir, f"bronze_{filename}_{now}.json")
         with open(bronze_path, "w", encoding="utf8") as r:
             json.dump(final_json, r, ensure_ascii=False)
 
-        print(f"{os.path.basename(bronze_path)} salvo com sucesso em {bronze_path.replace("\\", "/")}")
-
+        print(f"{os.path.basename(bronze_path)} salvo com sucesso em {os.path.normpath(bronze_path)}")

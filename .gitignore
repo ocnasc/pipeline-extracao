@@ -1,3 +1,5 @@
 .env
 __pycache__
 pipeline_extracao.ipynb
+pproc_only.py
+screen.py.old

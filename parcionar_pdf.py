@@ -5,7 +5,7 @@ last_page = 56  # <-- última página da seção
 
 section_name = "operation" # substituir pelo nome da seção
 
-path = "./pdfs/brutos/user_manual.pdf" # <-- PDF BRUTO 
+path = "/brutos/user_manual.pdf" # <-- PDF BRUTO 
 
 def parcionar(pages: list, sectionname:str, pathmanual:str) -> None:
     reader = PdfReader(pathmanual)
@@ -16,7 +16,7 @@ def parcionar(pages: list, sectionname:str, pathmanual:str) -> None:
         writer.add_page(reader.pages[i])
 
     pdf_name = sectionname.replace(" ", "_").lower() + ".pdf"
-    destiny_path = f"./pdfs/parcionados/{pdf_name}"
+    destiny_path = f"../assets/pdfs/parcionados/{pdf_name}"
 
     with open(destiny_path, "wb") as f:
         writer.write(f)

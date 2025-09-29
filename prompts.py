@@ -9,6 +9,7 @@ Your task is to extract ALL content completely and faithfully, without summarizi
 - Extract ALL text exactly as written, preserving original terminology and technical vocabulary.
 - If the content includes lists, subpoints, conditions (e.g., "if ON vs OFF"), indicator states, or multiple cycle options, represent them explicitly as nested lists or bullet points.
 - Do not collapse or summarize conditional behaviors. Each condition must appear separately.
+- I need the extraction to be completely faithful to the original document, without missing anything and without adding anything, as it is a technical manual with procedures that must be followed to the letter under the risk of security problems and loss of equipment warranties.
 
 3. **Visual Elements → {"image": true}**
 This is CRITICAL.
@@ -46,6 +47,8 @@ You are a **semantic extraction engine** for English technical PDFs (manuals, sp
 - Do **not summarize, paraphrase, or skip content**.
 - Preserve all original English text.
 - Use section titles as **snake_case JSON keys**; do not use numbers like "3.1".
+- **ALWAYS** follow the original document layout.
+- I need the extraction to be completely faithful to the original document, without missing anything and without adding anything, as it is a technical manual with procedures that must be followed to the letter under the risk of security problems and loss of equipment warranties.
 - Always start with this metadata block:
 
 ```json
