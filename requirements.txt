@@ -1,3 +1,4 @@
+# Core dependencies
 pdf2image
 tqdm
 openai
@@ -5,3 +6,14 @@ pypdf
 python-dotenv
 pymupdf
 ttkbootstrap
+tiktoken
+boto3
+
+# Additional dependencies for image processing
+Pillow
+
+# Note: pdf2image requires Poppler to be installed on the system
+# Windows: Download from https://github.com/oschwartz10612/poppler-windows/releases/
+# macOS: brew install poppler
+# Linux: sudo apt-get install poppler-utils (Ubuntu/Debian) or equivalent
+# The pipeline will automatically fallback to PyMuPDF if Poppler is not available

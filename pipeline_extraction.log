@@ -1,0 +1,74 @@
+2025-10-09 14:54:34,081 - pipeline_extracao - INFO - Configuration loaded successfully
+2025-10-09 16:33:47,718 - pipeline_extracao - INFO - Configuration loaded successfully
+2025-10-09 16:34:39,366 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\raw
+2025-10-09 16:34:39,367 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\bronze
+2025-10-09 16:34:39,367 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\silver
+2025-10-09 16:34:39,368 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\gold
+2025-10-09 16:34:39,369 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\brutos
+2025-10-09 16:34:39,369 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\parcionados
+2025-10-09 16:34:39,369 - pipeline_extracao - INFO - Found 1 PDF files to process
+2025-10-09 16:34:39,369 - pipeline_extracao - INFO - Starting processing of: set_of_tools.pdf
+2025-10-09 16:34:39,370 - pipeline_extracao - INFO - Processing document: set_of_tools.pdf
+2025-10-09 16:34:39,370 - pipeline_extracao - INFO - Converting PDF to images: C:\Users\OtavioNascimento\OneDrive\Projetos\CHATVOLT\PERITHO\SUNNY D\10317674 - LABELER\MANUAIS\spare_parts\set_of_tools.pdf
+2025-10-09 16:34:39,401 - pipeline_extracao - ERROR - Failed to convert PDF to images: Unable to get page count. Is poppler installed and in PATH?
+2025-10-09 16:34:39,401 - pipeline_extracao - ERROR - Error processing document set_of_tools.pdf: Unable to get page count. Is poppler installed and in PATH?
+2025-10-09 16:34:39,401 - pipeline_extracao - ERROR - Failed to process set_of_tools.pdf: Unable to get page count. Is poppler installed and in PATH?
+2025-10-09 16:34:39,401 - pipeline_extracao - INFO - Pipeline processing completed
+2025-10-09 16:36:52,928 - pipeline_extracao - INFO - Configuration loaded successfully
+2025-10-09 16:37:01,355 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\raw
+2025-10-09 16:37:01,355 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\bronze
+2025-10-09 16:37:01,355 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\silver
+2025-10-09 16:37:01,355 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\gold
+2025-10-09 16:37:01,356 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\brutos
+2025-10-09 16:37:01,356 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\parcionados
+2025-10-09 16:37:01,356 - pipeline_extracao - INFO - Found 1 PDF files to process
+2025-10-09 16:37:01,356 - pipeline_extracao - INFO - Starting processing of: set_of_tools.pdf
+2025-10-09 16:37:01,356 - pipeline_extracao - INFO - Processing document: set_of_tools.pdf
+2025-10-09 16:37:01,357 - pipeline_extracao - INFO - Converting PDF to images: C:\Users\OtavioNascimento\OneDrive\Projetos\CHATVOLT\PERITHO\SUNNY D\10317674 - LABELER\MANUAIS\spare_parts\set_of_tools.pdf
+2025-10-09 16:37:02,295 - pipeline_extracao - ERROR - Failed to convert PDF to images: Unable to get page count.
+
+2025-10-09 16:37:02,296 - pipeline_extracao - ERROR - Error processing document set_of_tools.pdf: Unable to get page count.
+
+2025-10-09 16:37:02,296 - pipeline_extracao - ERROR - Failed to process set_of_tools.pdf: Unable to get page count.
+
+2025-10-09 16:37:02,296 - pipeline_extracao - INFO - Pipeline processing completed
+2025-10-09 16:40:01,284 - pipeline_extracao - INFO - Configuration loaded successfully
+2025-10-09 16:40:09,591 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\raw
+2025-10-09 16:40:09,591 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\bronze
+2025-10-09 16:40:09,591 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\silver
+2025-10-09 16:40:09,592 - pipeline_extracao - INFO - Directory verified/created: ..\assets\json_results\gold
+2025-10-09 16:40:09,592 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\brutos
+2025-10-09 16:40:09,592 - pipeline_extracao - INFO - Directory verified/created: ..\assets\pdfs\parcionados
+2025-10-09 16:40:09,593 - pipeline_extracao - INFO - Found 1 PDF files to process
+2025-10-09 16:40:09,593 - pipeline_extracao - INFO - Starting processing of: set_of_tools.pdf
+2025-10-09 16:40:09,593 - pipeline_extracao - INFO - Processing document: set_of_tools.pdf
+2025-10-09 16:40:09,594 - pipeline_extracao - INFO - Converting PDF to images: C:\Users\OtavioNascimento\OneDrive\Projetos\CHATVOLT\PERITHO\SUNNY D\10317674 - LABELER\MANUAIS\spare_parts\set_of_tools.pdf
+2025-10-09 16:40:10,198 - pipeline_extracao - WARNING - Poppler not available, falling back to PyMuPDF
+2025-10-09 16:40:10,198 - pipeline_extracao - INFO - Converting PDF to images using PyMuPDF: C:\Users\OtavioNascimento\OneDrive\Projetos\CHATVOLT\PERITHO\SUNNY D\10317674 - LABELER\MANUAIS\spare_parts\set_of_tools.pdf
+2025-10-09 16:40:21,355 - pipeline_extracao - INFO - Successfully converted 172 pages using PyMuPDF
+2025-10-09 16:40:21,356 - pipeline_extracao - INFO - Extracting text from PDF: C:\Users\OtavioNascimento\OneDrive\Projetos\CHATVOLT\PERITHO\SUNNY D\10317674 - LABELER\MANUAIS\spare_parts\set_of_tools.pdf
+2025-10-09 16:40:21,828 - pipeline_extracao - INFO - Using model: gpt-4o
+2025-10-09 16:40:24,222 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:40:29,425 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:40:36,485 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:40:57,338 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:05,908 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:20,461 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:22,277 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:39,818 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:43,286 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:41:49,937 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:06,695 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:08,361 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:28,023 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:42,691 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:42,815 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:48,510 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:48,541 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:42:55,859 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:43:06,266 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:43:14,241 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-10-09 16:43:14,250 - pipeline_extracao - ERROR - Error processing document set_of_tools.pdf: cannot schedule new futures after interpreter shutdown
+2025-10-09 16:43:14,251 - pipeline_extracao - ERROR - Failed to process set_of_tools.pdf: cannot schedule new futures after interpreter shutdown
+2025-10-09 16:43:14,271 - pipeline_extracao - INFO - Pipeline processing completed
+2025-10-09 18:16:19,736 - pipeline_extracao - INFO - Configuration loaded successfully
