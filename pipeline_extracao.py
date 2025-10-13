@@ -37,19 +37,26 @@ PPROC_MODEL = "gpt-5-mini"
 # -------------------------------------------------------------------
 # Utility Functions
 # -------------------------------------------------------------------
-def create_directories():
+def create_directories(base_path):
+    """
+    Cria a estrutura de pastas a partir de base_path fornecido pelo usuário.
+    Não cria a pasta pai fixa, apenas subpastas.
+    """
     diretorios = [
-    Path("../assets/json_results/raw"),
-    Path("../assets/json_results/bronze"),
-    Path("../assets/json_results/silver"),
-    Path("../assets/json_results/gold"),
-    Path("../assets/pdfs/brutos"),
-    Path("../assets/pdfs/parcionados"),
+        Path(base_path) / "pdfs" / "brutos",
+        Path(base_path) / "pdfs" / "parcionados",
+        Path(base_path) / "json_results" / "raw",
+        Path(base_path) / "json_results" / "bronze",
+        Path(base_path) / "json_results" / "silver",
+        Path(base_path) / "json_results" / "gold",
     ]
 
     for d in diretorios:
-        d.mkdir(parents=True, exist_ok=True)  # cria se não existir
+        d.mkdir(parents=True, exist_ok=True)
         print(f"Diretório verificado/criado: {d}")
+
+    return diretorios  # útil para saber onde colocar os arquivos
+
 
 
 
@@ -177,24 +184,47 @@ def analyze_image(data_uri, text, model=ANALYSIS_MODEL_DEFAULT):
     )
     return response.choices[0].message.content
 
+
+def contar_tags_imagem(caminho_arquivo):
+    with open(caminho_arquivo, 'r', encoding='utf-8') as f:
+        dados = json.load(f)
+
+    def contar_recursivamente(obj):
+        contador = 0
+        if isinstance(obj, dict):
+            for chave, valor in obj.items():
+                if chave in ['image', 'images']:
+                    contador += 1
+                contador += contar_recursivamente(valor)
+        elif isinstance(obj, list):
+            for item in obj:
+                contador += contar_recursivamente(item)
+        return contador
+
+    return contar_recursivamente(dados)
+
+
 # -------------------------------------------------------------------
 # Main pipeline
 # -------------------------------------------------------------------
-def pipeline(path_parcionados, selected_file=None, chunk_size=10):
+def pipeline(base_path, filename, selected_file=None, chunk_size=10):
 
-    create_directories()
+    # create_directories(base_path)
 
-    files_path = path_parcionados
+    path_parcionados = Path(base_path) / "pdfs" / "parcionados"
 
-    if not os.path.isdir(files_path):
-        raise FileNotFoundError(f"Pasta não encontrada: {files_path}")
+    raw_dir = Path(base_path) / "json_results" / "raw"
+    bronze_dir = Path(base_path) / "json_results" / "bronze"
 
-    all_items = os.listdir(files_path)
-    files = [item for item in all_items if os.path.isfile(os.path.join(files_path, item)) and item.lower().endswith(".pdf")]
+    if not os.path.isdir(path_parcionados):
+        raise FileNotFoundError(f"Pasta não encontrada: {path_parcionados}")
+
+    all_items = os.listdir(path_parcionados)
+    files = [item for item in all_items if os.path.isfile(os.path.join(path_parcionados, item)) and item.lower().endswith(".pdf")]
 
     if selected_file:
         if selected_file not in files:
-            raise FileNotFoundError(f"Arquivo selecionado '{selected_file}' não encontrado em {files_path}")
+            raise FileNotFoundError(f"Arquivo selecionado '{selected_file}' não encontrado em {path_parcionados}")
         files = [selected_file]
     else:
         print("Nenhum arquivo selecionado — processando todos os PDFs da pasta.")
@@ -203,19 +233,17 @@ def pipeline(path_parcionados, selected_file=None, chunk_size=10):
     docs = []
 
     for f in files:
-        path = os.path.join(files_path, f)
+        path = os.path.join(path_parcionados, f)
         doc = {"filename": f}
-        filename = f.rsplit(".", 1)[0]
+        
 
         imgs = convert_doc_to_images(path)
         text = extract_text_by_page(path)
         pages_description = []
 
-        print(f"Processando páginas do documento: {f}")
 
 
 
-        chosen_model = ANALYSIS_MODEL_LARGE
         # estimated_tokens = estimate_total_tokens(ANALYSIS_MODEL_DEFAULT, text, len(imgs))
 
         # if estimated_tokens > 200_000:
@@ -227,6 +255,8 @@ def pipeline(path_parcionados, selected_file=None, chunk_size=10):
 
         # Processamento em blocos (chunk_size páginas de cada vez)
 
+        print(f"Processando páginas do documento: {f}")
+        chosen_model = ANALYSIS_MODEL_LARGE
 
 
         for chunk in split_list(list(enumerate(imgs)), chunk_size):
@@ -244,9 +274,8 @@ def pipeline(path_parcionados, selected_file=None, chunk_size=10):
         docs.append(doc)
 
         # Save raw results
-        raw_dir = "../assets/json_results/raw"
         os.makedirs(raw_dir, exist_ok=True)
-        raw_path = os.path.join(raw_dir, f"raw_{filename}_{now}.json")
+        raw_path = os.path.join(raw_dir, f"raw_{filename}.json")
         with open(raw_path, "w", encoding="utf-8") as file:
             json.dump(docs, file, ensure_ascii=False, indent=2)
 
@@ -258,10 +287,12 @@ def pipeline(path_parcionados, selected_file=None, chunk_size=10):
         stg_json = pproc(pproc_prompt, path, json_parcial)
         final_json = load_safe_json(stg_json)
 
-        bronze_dir = "../assets/json_results/bronze"
         os.makedirs(bronze_dir, exist_ok=True)
-        bronze_path = os.path.join(bronze_dir, f"bronze_{filename}_{now}.json")
+        bronze_path = os.path.join(bronze_dir, f"bronze_{filename}.json")
         with open(bronze_path, "w", encoding="utf8") as r:
             json.dump(final_json, r, ensure_ascii=False)
 
+        total_images = contar_tags_imagem(bronze_path)
+
         print(f"{os.path.basename(bronze_path)} salvo com sucesso em {os.path.normpath(bronze_path)}")
+        print(f"Total de imagens encontradas: {total_images}")

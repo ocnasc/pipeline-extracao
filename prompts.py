@@ -54,6 +54,7 @@ You are a **semantic extraction engine** for English technical PDFs (manuals, sp
 ```json
 {
   "general_information": {
+    "customer": "[DETECT FROM CONTENT]",
     "machine_serial_number": "[DETECT FROM CONTENT]",
     "machine_manufacturer": "[DETECT FROM CONTENT]",
     "machine_type": "[DETECT FROM CONTENT]",

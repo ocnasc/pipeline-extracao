@@ -1,24 +1,41 @@
-from pypdf import PdfReader, PdfWriter
+# parcionar_pdf.py
+import fitz  # PyMuPDF
+from pathlib import Path
 
-first_page = 49  # <-- primeira página da seção
-last_page = 56  # <-- última página da seção
+def parcionar(pages, section_name, pdf_path, output_dir):
+    """
+    Particiona um PDF em uma seção específica usando PyMuPDF.
 
-section_name = "operation" # substituir pelo nome da seção
+    :param pages: lista [primeira_pagina, ultima_pagina] (base 1)
+    :param section_name: nome da seção
+    :param pdf_path: caminho completo para o PDF bruto
+    :param output_dir: pasta onde o PDF particionado será salvo
+    """
+    first_page, last_page = pages
 
-path = "/brutos/user_manual.pdf" # <-- PDF BRUTO 
+    if first_page < 1 or last_page < first_page:
+        raise ValueError("Páginas inválidas para particionar.")
 
-def parcionar(pages: list, sectionname:str, pathmanual:str) -> None:
-    reader = PdfReader(pathmanual)
-    writer = PdfWriter()
-    first_page = pages[0]
-    last_page = pages[1]
-    for i in range(first_page-1, last_page):
-        writer.add_page(reader.pages[i])
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    pdf_name = sectionname.replace(" ", "_").lower() + ".pdf"
-    destiny_path = f"../assets/pdfs/parcionados/{pdf_name}"
+    doc = fitz.open(pdf_path)  # abre o PDF
+    total_pages = doc.page_count
 
-    with open(destiny_path, "wb") as f:
-        writer.write(f)
+    if last_page > total_pages:
+        last_page = total_pages  # não extrapolar
 
-    print(f"{pdf_name} salvo com sucesso em {destiny_path}")
+    # cria novo PDF
+    new_doc = fitz.open()
+
+    # fitz indexa páginas a partir de 0
+    for i in range(first_page - 1, last_page):
+        new_doc.insert_pdf(doc, from_page=i, to_page=i)
+
+    output_file = output_dir / f"{section_name}.pdf"
+    new_doc.save(output_file)
+    new_doc.close()
+    doc.close()
+
+    print(f"PDF particionado salvo em: {output_file}")
+    return output_file
