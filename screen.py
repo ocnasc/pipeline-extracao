@@ -289,10 +289,10 @@ status_label.pack(pady=(0, 12))
 
 
 
-entry_serial.insert(0, "10317674") ## TESTE !!!! apagar depois
-entry_first.insert(0, "51") ## TESTE !!!! apagar depois
-entry_last.insert(0, "56") ## TESTE !!!! apagar depois
-entry_section.insert(0, "installation") ## TESTE !!!! apagar depois
+# entry_serial.insert(0, "10317674") ## TESTE !!!! apagar depois
+# entry_first.insert(0, "51") ## TESTE !!!! apagar depois
+# entry_last.insert(0, "56") ## TESTE !!!! apagar depois
+# entry_section.insert(0, "installation") ## TESTE !!!! apagar depois
 
 
 
