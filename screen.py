@@ -17,19 +17,16 @@ def executar():
         # Verificação obrigatória dos campos iniciais
         serial_number = entry_serial.get().strip()
         manual_name = entry_manual.get().strip()
-        section_name_global = entry_sectionname_global.get().strip()
+        sectionname = entry_section.get().strip()
 
-        if not serial_number or not manual_name or not section_name_global:
+        if not serial_number or not manual_name or not sectionname:
             messagebox.showerror("Erro", "Preencha Serial Number, Nome do Manual e Nome da Seção antes de continuar.")
             return
 
         acao = var_acao.get()
 
         if acao == 1:  # Particionar PDF
-            sectionname = entry_section.get().strip()
             path_manual_bruto = entry_pdf_bruto.get().strip()
-            if not sectionname:
-                sectionname = section_name_global  # usa a seção informada no topo
 
             if not path_manual_bruto:
                 messagebox.showerror("Erro", "Selecione o PDF bruto antes de continuar.")
@@ -46,25 +43,19 @@ def executar():
             # ------------------ Nova lógica ------------------
 
             user_pdf_path = Path(path_manual_bruto)
-            base_path = user_pdf_path.parent  # pasta base definida pelo PDF do usuário
+            base_path = user_pdf_path.parent
 
-            # criar subpastas e copiar PDF para pdfs/brutos
-            bruto_dir = Path(base_path) / "pdfs" / "brutos"
-            bruto_dir.mkdir(parents=True, exist_ok=True)
-            dest_bruto = bruto_dir / user_pdf_path.name
-            shutil.copy(user_pdf_path, dest_bruto)
-            print(f"PDF copiado para: {dest_bruto}")
 
             # criar a pasta parcionados
-            parcionados_dir = Path(base_path) / "pdfs" / "parcionados"
+            parcionados_dir = Path(base_path) / "PDFs parcionados"
             parcionados_dir.mkdir(parents=True, exist_ok=True)
 
             # chama a função de particionar PDF usando o caminho do bruto copiado
-            parcionar(pages, sectionname, str(dest_bruto), str(parcionados_dir))
+            parcionar(pages, sectionname, str(user_pdf_path), str(parcionados_dir))
             messagebox.showinfo("Sucesso", f"PDF particionado: seção '{sectionname}' gerada!")
 
             # opcional: você pode já preparar o filename para pipeline
-            filename = f"{serial_number}_{manual_name}_{section_name_global}"
+            filename = f"{serial_number}_{manual_name}_{sectionname}"
             # pipeline(base_path, filename, selected_file=dest_bruto.name)
 
 
@@ -73,13 +64,13 @@ def executar():
             path_pdfs_parcionados = entry_pdfs_parcionados.get().strip()
             file_choice = combo_files.get()
 
-            base_path = Path(path_pdfs_parcionados).parent.parent
+            base_path = Path(path_pdfs_parcionados).parent
 
             diretorios = [
-                Path(base_path) / "json_results" / "raw",
-                Path(base_path) / "json_results" / "bronze",
-                Path(base_path) / "json_results" / "silver",
-                Path(base_path) / "json_results" / "gold",
+                Path(base_path) / "results" / "raw",
+                Path(base_path) / "results" / "silver",
+                Path(base_path) / "results" / "gold",
+                Path(base_path) / "results" / "upload"
             ]
 
             for d in diretorios:
@@ -94,7 +85,7 @@ def executar():
                 return
 
             # 🔹 Cria o nome concatenado
-            filename = f"{serial_number}_{manual_name}_{section_name_global}"
+            filename = f"{serial_number}_{manual_name}_{sectionname}"
 
             btn_executar.config(state="disabled")
             status_label.config(text=f"Processando {file_choice} ... (aguarde)")
@@ -165,6 +156,11 @@ def escolher_pdf():
         entry_pdf_bruto.delete(0, "end")
         entry_pdf_bruto.insert(0, filename)
 
+        manual_name = os.path.splitext(os.path.basename(filename))[0]
+        entry_manual.delete(0, "end")
+        entry_manual.insert(0, manual_name)
+
+
 
 def escolher_pasta():
     folder = filedialog.askdirectory()
@@ -222,13 +218,13 @@ ttk.Label(frame_info, text="Serial Number:").grid(row=0, column=0, sticky="w", p
 entry_serial = ttk.Entry(frame_info, width=30)
 entry_serial.grid(row=0, column=1, padx=5, pady=4)
 
+
+
+
+
 ttk.Label(frame_info, text="Nome do Manual:").grid(row=1, column=0, sticky="w", pady=4)
 entry_manual = ttk.Entry(frame_info, width=30)
 entry_manual.grid(row=1, column=1, padx=5, pady=4)
-
-ttk.Label(frame_info, text="Nome da Seção:").grid(row=2, column=0, sticky="w", pady=4)
-entry_sectionname_global = ttk.Entry(frame_info, width=30)
-entry_sectionname_global.grid(row=2, column=1, padx=5, pady=4)
 
 # ---------------------- Escolha da ação ----------------------
 frame_acao = ttk.Labelframe(root, text="Ação", padding=10)
@@ -249,7 +245,7 @@ ttk.Label(frame_secao, text="Última página:").grid(row=1, column=0, sticky="w"
 entry_last = ttk.Entry(frame_secao, width=10)
 entry_last.grid(row=1, column=1, padx=5, pady=2)
 
-ttk.Label(frame_secao, text="Nome da seção (opcional):").grid(row=2, column=0, sticky="w", pady=2)
+ttk.Label(frame_secao, text="Nome da seção:").grid(row=2, column=0, sticky="w", pady=2)
 entry_section = ttk.Entry(frame_secao, width=20)
 entry_section.grid(row=2, column=1, padx=5, pady=2)
 
@@ -289,6 +285,18 @@ btn_executar.pack(pady=18)
 
 status_label = ttk.Label(root, text="", anchor="center")
 status_label.pack(pady=(0, 12))
+
+
+
+
+entry_serial.insert(0, "10317674") ## TESTE !!!! apagar depois
+entry_first.insert(0, "51") ## TESTE !!!! apagar depois
+entry_last.insert(0, "56") ## TESTE !!!! apagar depois
+entry_section.insert(0, "installation") ## TESTE !!!! apagar depois
+
+
+
+
 
 mostrar_frame_acao()
 root.mainloop()

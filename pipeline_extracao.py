@@ -37,28 +37,25 @@ PPROC_MODEL = "gpt-5-mini"
 # -------------------------------------------------------------------
 # Utility Functions
 # -------------------------------------------------------------------
-def create_directories(base_path):
-    """
-    Cria a estrutura de pastas a partir de base_path fornecido pelo usuário.
-    Não cria a pasta pai fixa, apenas subpastas.
-    """
-    diretorios = [
-        Path(base_path) / "pdfs" / "brutos",
-        Path(base_path) / "pdfs" / "parcionados",
-        Path(base_path) / "json_results" / "raw",
-        Path(base_path) / "json_results" / "bronze",
-        Path(base_path) / "json_results" / "silver",
-        Path(base_path) / "json_results" / "gold",
-    ]
+# def create_directories(base_path):
+#     """
+#     Cria a estrutura de pastas a partir de base_path fornecido pelo usuário.
+#     Não cria a pasta pai fixa, apenas subpastas.
+#     """
+#     diretorios = [
+#         Path(base_path) / "pdfs" / "brutos",
+#         Path(base_path) / "pdfs" / "parcionados",
+#         Path(base_path) / "json_results" / "raw",
+#         Path(base_path) / "json_results" / "bronze",
+#         Path(base_path) / "json_results" / "silver",
+#         Path(base_path) / "json_results" / "gold",
+#     ]
 
-    for d in diretorios:
-        d.mkdir(parents=True, exist_ok=True)
-        print(f"Diretório verificado/criado: {d}")
+#     for d in diretorios:
+#         d.mkdir(parents=True, exist_ok=True)
+#         print(f"Diretório verificado/criado: {d}")
 
-    return diretorios  # útil para saber onde colocar os arquivos
-
-
-
+#     return diretorios  # útil para saber onde colocar os arquivos
 
 
 def count_tokens(model, text):
@@ -209,12 +206,10 @@ def contar_tags_imagem(caminho_arquivo):
 # -------------------------------------------------------------------
 def pipeline(base_path, filename, selected_file=None, chunk_size=10):
 
-    # create_directories(base_path)
+    path_parcionados = Path(base_path) / "PDFs parcionados"
 
-    path_parcionados = Path(base_path) / "pdfs" / "parcionados"
-
-    raw_dir = Path(base_path) / "json_results" / "raw"
-    bronze_dir = Path(base_path) / "json_results" / "bronze"
+    raw_dir = Path(base_path) / "results" / "raw"
+    silver_dir = Path(base_path) / "results" / "silver"
 
     if not os.path.isdir(path_parcionados):
         raise FileNotFoundError(f"Pasta não encontrada: {path_parcionados}")
@@ -287,12 +282,12 @@ def pipeline(base_path, filename, selected_file=None, chunk_size=10):
         stg_json = pproc(pproc_prompt, path, json_parcial)
         final_json = load_safe_json(stg_json)
 
-        os.makedirs(bronze_dir, exist_ok=True)
-        bronze_path = os.path.join(bronze_dir, f"bronze_{filename}.json")
-        with open(bronze_path, "w", encoding="utf8") as r:
+        os.makedirs(silver_dir, exist_ok=True)
+        silver_path = os.path.join(silver_dir, f"silver_{filename}.json")
+        with open(silver_path, "w", encoding="utf8") as r:
             json.dump(final_json, r, ensure_ascii=False)
 
-        total_images = contar_tags_imagem(bronze_path)
+        total_images = contar_tags_imagem(silver_path)
 
-        print(f"{os.path.basename(bronze_path)} salvo com sucesso em {os.path.normpath(bronze_path)}")
+        print(f"{os.path.basename(silver_path)} salvo com sucesso em {os.path.normpath(silver_path)}")
         print(f"Total de imagens encontradas: {total_images}")
