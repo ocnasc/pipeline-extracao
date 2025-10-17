@@ -156,6 +156,45 @@ def pproc(pproc_prompt, path, json_str):
         return str(response.output[0].content[0].text).replace("```json", "").replace("```", "")
 
 
+import os
+
+def silver_json(pdf, json, silver_json_prompt):
+    print(f"Comparando arquivos e gerando SILVER:\n###> {os.path.basename(pdf)} e {os.path.basename(json)} <###")
+
+    # Envia o PDF
+    with open(pdf, "rb") as pdf_f:
+        pdf_file = client.files.create(file=pdf_f, purpose="user_data")
+    
+    # Lê o JSON como string
+    with open(json, "r", encoding="utf-8") as json_f:
+        json_string = json_f.read()
+
+    # Cria a resposta
+    response = client.responses.create(
+        model=PPROC_MODEL,
+        input=[
+            {"role": "system", "content": silver_json_prompt},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "input_file", "file_id": pdf_file.id},
+                    {"type": "input_text", "text": json_string}
+                ],
+            },
+        ],
+    )
+
+    # Renomeia o arquivo JSON para .tmp em vez de excluir
+    base, ext = os.path.splitext(json)
+    novo_nome = base + ".tmp"
+    os.rename(json, novo_nome)
+
+    # Retorna o output do modelo
+    return response.output_text.replace("```json", "").replace("```", "")
+
+
+
+
 def analyze_doc_image(img, text, model=ANALYSIS_MODEL_DEFAULT):
     img_uri = get_img_uri(img)
     return analyze_image(img_uri, text, model)
@@ -204,7 +243,9 @@ def contar_tags_imagem(caminho_arquivo):
 # -------------------------------------------------------------------
 # Main pipeline
 # -------------------------------------------------------------------
-def pipeline(base_path, filename, selected_file=None, chunk_size=10):
+def pipeline(base_path, filename, general_information, selected_file=None, chunk_size=10):
+
+    start_time = time.time()
 
     path_parcionados = Path(base_path) / "PDFs parcionados"
 
@@ -228,16 +269,13 @@ def pipeline(base_path, filename, selected_file=None, chunk_size=10):
     docs = []
 
     for f in files:
-        path = os.path.join(path_parcionados, f)
+        pdf_path = os.path.join(path_parcionados, f)
         doc = {"filename": f}
         
 
-        imgs = convert_doc_to_images(path)
-        text = extract_text_by_page(path)
+        imgs = convert_doc_to_images(pdf_path)
+        text = extract_text_by_page(pdf_path)
         pages_description = []
-
-
-
 
         # estimated_tokens = estimate_total_tokens(ANALYSIS_MODEL_DEFAULT, text, len(imgs))
 
@@ -279,15 +317,27 @@ def pipeline(base_path, filename, selected_file=None, chunk_size=10):
         with open(raw_path, "r", encoding="utf8") as file:
             json_parcial = file.read()
 
-        stg_json = pproc(pproc_prompt, path, json_parcial)
-        final_json = load_safe_json(stg_json)
+        pproc_json = load_safe_json(pproc(pproc_prompt, pdf_path, json_parcial))
 
         os.makedirs(silver_dir, exist_ok=True)
-        silver_path = os.path.join(silver_dir, f"silver_{filename}.json")
-        with open(silver_path, "w", encoding="utf8") as r:
-            json.dump(final_json, r, ensure_ascii=False)
+        stg_silver_path = os.path.join(silver_dir, f"tmp_silver_{filename}.json")
+        with open(stg_silver_path, "w", encoding="utf8") as r:
+            json.dump(pproc_json, r, ensure_ascii=False)
 
-        total_images = contar_tags_imagem(silver_path)
+        final_prompt = silver_prompt(general_information)
 
-        print(f"{os.path.basename(silver_path)} salvo com sucesso em {os.path.normpath(silver_path)}")
+        final_silver = load_safe_json(silver_json(pdf_path, stg_silver_path, final_prompt))
+        final_silver_path = os.path.join(silver_dir, f"silver_{filename}.json")
+
+        with open(final_silver_path, "w", encoding="utf8") as r:
+            json.dump(final_silver, r, ensure_ascii=False)
+
+        total_images = contar_tags_imagem(final_silver_path)
+
+        print(f"{os.path.basename(final_silver_path)} salvo com sucesso em {os.path.normpath(final_silver_path)}")
         print(f"Total de imagens encontradas: {total_images}")
+
+        # Calcula o tempo total de execução
+        end_time = time.time()
+        elapsed_seconds = end_time - start_time
+        print(f"Tempo total de execução da pipeline: {elapsed_seconds:.2f} segundos ({elapsed_seconds/60:.2f} minutos)")

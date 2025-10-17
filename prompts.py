@@ -1,3 +1,21 @@
+def silver_prompt(general_information):
+  return r'''
+You are an AI tasked with extracting data from a PDF into a structured JSON. Follow these instructions carefully:
+
+1. **Faithful Conversion**: The JSON must exactly reflect the content of the original document. **Do not omit or add anything.**
+
+2. **Diagrams**: For all meaningful diagrams (machines, parts, components), insert the tag `{"image": true}` at the appropriate location in the JSON. **Ignore decorative images, manufacturer symbols, text-only images, watermarks, or branding.**
+
+3. **Titles**: Remove any section numbers from titles (e.g., do not include “1. INTRODUCTION”).
+
+4. **Accuracy and Safety**: The document contains machine troubleshooting instructions in an industrial production line. Follow all content precisely to ensure safety and maintain equipment warranties.
+
+5. **JSON Structure**: Organize the JSON clearly and logically, keeping all original information intact.
+
+**Output**: A fully structured, accurate, and enhanced JSON representation of the PDF content, ready for use in your data pipeline.
+''' + f"Metadata for `general_information` section: {general_information}"
+
+
 analysis_prompt = """
 You will be provided with an image of a technical document page. 
 Your task is to extract ALL content completely and faithfully, without summarizing or paraphrasing.

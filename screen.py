@@ -87,13 +87,15 @@ def executar():
             # 🔹 Cria o nome concatenado
             filename = f"{serial_number}_{manual_name}_{sectionname}"
 
+            general_information = {"machine_serial_number": serial_number, "document_type": manual_name}
+
             btn_executar.config(state="disabled")
             status_label.config(text=f"Processando {file_choice} ... (aguarde)")
 
             def run_pipeline():
                 try:
                     # 🔹 Passa o filename para a função pipeline
-                    pipeline(base_path, filename, file_choice)
+                    pipeline(base_path, filename, general_information, file_choice)
                 except Exception as e:
                     root.after(0, lambda e=e: messagebox.showerror("Erro", str(e)))
                 else:
