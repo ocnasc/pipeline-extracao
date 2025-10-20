@@ -269,9 +269,18 @@ entry_pdfs_parcionados = ttk.Entry(frame_pasta, width=50)
 entry_pdfs_parcionados.pack(side="left", padx=5, pady=5, fill="x", expand=True)
 ttk.Button(frame_pasta, text="Selecionar", bootstyle=SECONDARY, command=escolher_pasta).pack(side="left", padx=5)
 
+def atualizar_nome_secao(event=None):
+    """Atualiza o nome da seção com base no PDF selecionado"""
+    file_choice = combo_files.get()
+    if file_choice:
+        section_name = os.path.splitext(file_choice)[0]
+        entry_section.delete(0, "end")
+        entry_section.insert(0, section_name)
+
 frame_arquivos = ttk.Labelframe(root, text="Escolha o PDF para processar (ação 2)", padding=10)
 combo_files = ttk.Combobox(frame_arquivos, width=50, state="readonly")
 combo_files.pack(fill="x", padx=5, pady=5)
+combo_files.bind("<<ComboboxSelected>>", atualizar_nome_secao)
 
 # ---------------------- Ação 3 ----------------------
 frame_s3 = ttk.Labelframe(root, text="Envio para Amazon S3 (ação 3)", padding=10)
