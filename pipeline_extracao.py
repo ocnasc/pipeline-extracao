@@ -138,39 +138,109 @@ def pproc(pproc_prompt, path, json_str):
         return str(response.output[0].content[0].text).replace("```json", "").replace("```", "")
 
 
+def safe_silver_json(pdf, json, silver_json_prompt, retries=3):
+    """Wrapper com retry logic e logging detalhado para silver_json."""
+    backoff = 10
+
+    for attempt in range(retries):
+        try:
+            print(f"\n{'='*60}")
+            print(f"[SILVER_JSON] Tentativa {attempt + 1}/{retries}")
+            print(f"{'='*60}")
+            return silver_json(pdf, json, silver_json_prompt)
+
+        except RateLimitError as e:
+            wait = backoff * (2 ** attempt) + random.uniform(0, 3)
+            print(f"\n⚠️ [SILVER_JSON] RateLimitError na tentativa {attempt + 1}/{retries}")
+            print(f"   Detalhes: {e}")
+            print(f"   Aguardando {wait:.1f}s antes de tentar novamente...")
+            time.sleep(wait)
+
+        except APIError as e:
+            wait = backoff * (2 ** attempt) + random.uniform(0, 3)
+            print(f"\n⚠️ [SILVER_JSON] APIError na tentativa {attempt + 1}/{retries}")
+            print(f"   Tipo: {type(e).__name__}")
+            print(f"   Código: {getattr(e, 'status_code', 'N/A')}")
+            print(f"   Mensagem: {e}")
+            print(f"   Aguardando {wait:.1f}s antes de tentar novamente...")
+            time.sleep(wait)
+
+        except Exception as e:
+            print(f"\n❌ [SILVER_JSON] Erro inesperado na tentativa {attempt + 1}/{retries}")
+            print(f"   Tipo: {type(e).__name__}")
+            print(f"   Mensagem: {e}")
+            print(f"   Detalhes completos:")
+            import traceback
+            traceback.print_exc()
+            raise
+
+    raise RuntimeError(f"❌ [SILVER_JSON] Falhou após {retries} tentativas")
+
+
 def silver_json(pdf, json, silver_json_prompt):
-    print(f"Comparando arquivos e gerando SILVER:\n###> {os.path.basename(pdf)} e {os.path.basename(json)} <###")
+    print(f"\n[SILVER_JSON] Iniciando processamento")
+    print(f"[SILVER_JSON] PDF: {os.path.basename(pdf)}")
+    print(f"[SILVER_JSON] JSON: {os.path.basename(json)}")
 
-    # Envia o PDF
-    with open(pdf, "rb") as pdf_f:
-        pdf_file = client.files.create(file=pdf_f, purpose="user_data")
-    
-    # Lê o JSON como string
-    with open(json, "r", encoding="utf-8") as json_f:
-        json_string = json_f.read()
+    try:
+        # Lê o JSON como string
+        print(f"[SILVER_JSON] Lendo arquivo JSON...")
+        with open(json, "r", encoding="utf-8") as json_f:
+            json_string = json_f.read()
 
-    # Cria a resposta
-    response = client.responses.create(
-        model=PPROC_MODEL,
-        input=[
-            {"role": "system", "content": silver_json_prompt},
-            {
-                "role": "user",
-                "content": [
-                    {"type": "input_file", "file_id": pdf_file.id},
-                    {"type": "input_text", "text": json_string}
-                ],
-            },
-        ],
-    )
+        json_size_kb = len(json_string) / 1024
+        print(f"[SILVER_JSON] Tamanho do JSON: {len(json_string)} caracteres ({json_size_kb:.2f} KB)")
 
-    # Renomeia o arquivo JSON para .tmp em vez de excluir
-    base, ext = os.path.splitext(json)
-    novo_nome = base + ".tmp"
-    os.rename(json, novo_nome)
+        # Envia o PDF
+        print(f"[SILVER_JSON] Enviando PDF para OpenAI...")
+        pdf_size_mb = os.path.getsize(pdf) / (1024 * 1024)
+        print(f"[SILVER_JSON] Tamanho do PDF: {pdf_size_mb:.2f} MB")
 
-    # Retorna o output do modelo
-    return response.output_text.replace("```json", "").replace("```", "")
+        with open(pdf, "rb") as pdf_f:
+            pdf_file = client.files.create(file=pdf_f, purpose="user_data")
+
+        print(f"[SILVER_JSON] PDF enviado com sucesso. File ID: {pdf_file.id}")
+
+        # Cria a resposta
+        print(f"[SILVER_JSON] Chamando API com modelo: {PPROC_MODEL}")
+        print(f"[SILVER_JSON] Tamanho do prompt: {len(silver_json_prompt)} caracteres")
+
+        response = client.responses.create(
+            model=PPROC_MODEL,
+            input=[
+                {"role": "system", "content": silver_json_prompt},
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_file", "file_id": pdf_file.id},
+                        {"type": "input_text", "text": json_string}
+                    ],
+                },
+            ],
+        )
+
+        print(f"[SILVER_JSON] Resposta recebida com sucesso")
+
+        # Renomeia o arquivo JSON para .tmp em vez de excluir
+        print(f"[SILVER_JSON] Renomeando arquivo JSON para .tmp...")
+        base, ext = os.path.splitext(json)
+        novo_nome = base + ".tmp"
+        os.rename(json, novo_nome)
+        print(f"[SILVER_JSON] Arquivo renomeado: {os.path.basename(novo_nome)}")
+
+        # Retorna o output do modelo
+        output = response.output_text.replace("```json", "").replace("```", "")
+        print(f"[SILVER_JSON] Tamanho da resposta: {len(output)} caracteres")
+        print(f"[SILVER_JSON] Processamento concluído com sucesso\n")
+
+        return output
+
+    except Exception as e:
+        print(f"\n❌ [SILVER_JSON] ERRO DURANTE EXECUÇÃO")
+        print(f"   Tipo: {type(e).__name__}")
+        print(f"   Mensagem: {e}")
+        print(f"   Código de status: {getattr(e, 'status_code', 'N/A')}")
+        raise
 
 
 
@@ -293,7 +363,7 @@ def pipeline(base_path, filename, general_information, selected_file=None, chunk
 
         final_prompt = silver_prompt(general_information)
 
-        final_silver = load_safe_json(silver_json(pdf_path, stg_silver_path, final_prompt))
+        final_silver = load_safe_json(safe_silver_json(pdf_path, stg_silver_path, final_prompt))
         final_silver_path = os.path.join(silver_dir, f"silver_{filename}.json")
 
         with open(final_silver_path, "w", encoding="utf8") as r:

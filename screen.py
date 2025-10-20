@@ -97,7 +97,14 @@ def executar():
                     # 🔹 Passa o filename para a função pipeline
                     pipeline(base_path, filename, general_information, file_choice)
                 except Exception as e:
-                    root.after(0, lambda e=e: messagebox.showerror("Erro", str(e)))
+                    import traceback
+                    error_details = traceback.format_exc()
+                    error_msg = f"Tipo: {type(e).__name__}\n\nMensagem: {str(e)}\n\nDetalhes completos no console."
+                    print(f"\n{'='*60}")
+                    print("ERRO DURANTE PIPELINE:")
+                    print(error_details)
+                    print(f"{'='*60}\n")
+                    root.after(0, lambda e=error_msg: messagebox.showerror("Erro na Pipeline", e))
                 else:
                     root.after(0, lambda: messagebox.showinfo(
                         "Sucesso", f"Pipeline concluído para {file_choice}!\nArquivo: {filename}"
