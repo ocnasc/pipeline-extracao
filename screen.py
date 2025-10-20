@@ -228,6 +228,10 @@ ttk.Label(frame_info, text="Nome do Manual:").grid(row=1, column=0, sticky="w", 
 entry_manual = ttk.Entry(frame_info, width=30)
 entry_manual.grid(row=1, column=1, padx=5, pady=4)
 
+ttk.Label(frame_info, text="Nome da Seção:").grid(row=2, column=0, sticky="w", pady=4)
+entry_section = ttk.Entry(frame_info, width=30)
+entry_section.grid(row=2, column=1, padx=5, pady=4)
+
 # ---------------------- Escolha da ação ----------------------
 frame_acao = ttk.Labelframe(root, text="Ação", padding=10)
 frame_acao.pack(fill="x", padx=10, pady=8)
@@ -246,10 +250,6 @@ entry_first.grid(row=0, column=1, padx=5, pady=2)
 ttk.Label(frame_secao, text="Última página:").grid(row=1, column=0, sticky="w", pady=2)
 entry_last = ttk.Entry(frame_secao, width=10)
 entry_last.grid(row=1, column=1, padx=5, pady=2)
-
-ttk.Label(frame_secao, text="Nome da seção:").grid(row=2, column=0, sticky="w", pady=2)
-entry_section = ttk.Entry(frame_secao, width=20)
-entry_section.grid(row=2, column=1, padx=5, pady=2)
 
 frame_pdf = ttk.Labelframe(root, text="PDF Bruto (ação 1)", padding=10)
 entry_pdf_bruto = ttk.Entry(frame_pdf, width=50)

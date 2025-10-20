@@ -27,37 +27,19 @@ from pathlib import Path
 load_dotenv()
 now = datetime.now().strftime(r"%Y%m%dT%H%M%S")
 api_key = os.getenv("OPENAI_API_KEY")
+
+if not api_key:
+    raise ValueError("OPENAI_API_KEY não encontrada no arquivo .env")
+
 client = OpenAI(api_key=api_key)
 
-
-ANALYSIS_MODEL_DEFAULT = "gpt-4.1"#"gpt-4o-mini"
-ANALYSIS_MODEL_LARGE = "gpt-4.1"
+# Model configuration
+ANALYSIS_MODEL = "gpt-4.1"
 PPROC_MODEL = "gpt-5-mini"
 
 # -------------------------------------------------------------------
 # Utility Functions
 # -------------------------------------------------------------------
-# def create_directories(base_path):
-#     """
-#     Cria a estrutura de pastas a partir de base_path fornecido pelo usuário.
-#     Não cria a pasta pai fixa, apenas subpastas.
-#     """
-#     diretorios = [
-#         Path(base_path) / "pdfs" / "brutos",
-#         Path(base_path) / "pdfs" / "parcionados",
-#         Path(base_path) / "json_results" / "raw",
-#         Path(base_path) / "json_results" / "bronze",
-#         Path(base_path) / "json_results" / "silver",
-#         Path(base_path) / "json_results" / "gold",
-#     ]
-
-#     for d in diretorios:
-#         d.mkdir(parents=True, exist_ok=True)
-#         print(f"Diretório verificado/criado: {d}")
-
-#     return diretorios  # útil para saber onde colocar os arquivos
-
-
 def count_tokens(model, text):
     enc = tiktoken.encoding_for_model(model)
     return len(enc.encode(text))
@@ -156,8 +138,6 @@ def pproc(pproc_prompt, path, json_str):
         return str(response.output[0].content[0].text).replace("```json", "").replace("```", "")
 
 
-import os
-
 def silver_json(pdf, json, silver_json_prompt):
     print(f"Comparando arquivos e gerando SILVER:\n###> {os.path.basename(pdf)} e {os.path.basename(json)} <###")
 
@@ -195,12 +175,12 @@ def silver_json(pdf, json, silver_json_prompt):
 
 
 
-def analyze_doc_image(img, text, model=ANALYSIS_MODEL_DEFAULT):
+def analyze_doc_image(img, text, model=ANALYSIS_MODEL):
     img_uri = get_img_uri(img)
     return analyze_image(img_uri, text, model)
 
 
-def analyze_image(data_uri, text, model=ANALYSIS_MODEL_DEFAULT):
+def analyze_image(data_uri, text, model=ANALYSIS_MODEL):
     """Analisa imagem + texto (sem retries automáticos)."""
     response = client.chat.completions.create(
         model=model,
@@ -277,24 +257,11 @@ def pipeline(base_path, filename, general_information, selected_file=None, chunk
         text = extract_text_by_page(pdf_path)
         pages_description = []
 
-        # estimated_tokens = estimate_total_tokens(ANALYSIS_MODEL_DEFAULT, text, len(imgs))
-
-        # if estimated_tokens > 200_000:
-        #     chosen_model = ANALYSIS_MODEL_LARGE
-        #     print(f"⚠️ Estimado {estimated_tokens} tokens, trocando para {chosen_model}")
-        # else:
-        #     chosen_model = ANALYSIS_MODEL_DEFAULT
-        #     print(f"✅ Estimado {estimated_tokens} tokens, mantendo {chosen_model}")
-
-        # Processamento em blocos (chunk_size páginas de cada vez)
-
         print(f"Processando páginas do documento: {f}")
-        chosen_model = ANALYSIS_MODEL_LARGE
-
 
         for chunk in split_list(list(enumerate(imgs)), chunk_size):
             with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-                futures = [executor.submit(analyze_doc_image, img, text[idx], chosen_model) for idx, img in chunk]
+                futures = [executor.submit(analyze_doc_image, img, text[idx], ANALYSIS_MODEL) for idx, img in chunk]
 
                 with tqdm(total=len(chunk)) as pbar:
                     for _ in concurrent.futures.as_completed(futures):
