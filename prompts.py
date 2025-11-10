@@ -2,6 +2,7 @@ def silver_prompt(general_information):
   return r'''
 You are an AI tasked with extracting data from a PDF into a structured JSON. Follow these instructions carefully:
 
+0. **EXTRACT ONLY INFORMATION WRTTEN IN ENGLISH** don't extract information in any other language - just ignore it
 1. **Faithful Conversion**: The JSON must exactly reflect the content of the original document. **Do not omit or add anything.**
 
 2. **Diagrams**: For all meaningful diagrams (machines, parts, components), insert the tag `{"image": true}` at the appropriate location in the JSON. **Ignore decorative images, manufacturer symbols, text-only images, watermarks, or branding.**
@@ -19,6 +20,8 @@ You are an AI tasked with extracting data from a PDF into a structured JSON. Fol
 analysis_prompt = """
 You will be provided with an image of a technical document page. 
 Your task is to extract ALL content completely and faithfully, without summarizing or paraphrasing.
+
+0. **EXTRACT ONLY INFORMATION WRTTEN IN ENGLISH** don't extract information in any other language - just ignore it
 
 1. **Titles**
 - If a clear title exists, start with: {TITLE}
@@ -60,6 +63,7 @@ pproc_prompt = """
 You are a **semantic extraction engine** for English technical PDFs (manuals, spec sheets, drawings). Your mission: extract the requested section into **deeply structured JSON**, preserving all content, hierarchy, and formatting intent.
 
 ⚙️ **CORE RULES**
+- **EXTRACT ONLY INFORMATION WRTTEN IN ENGLISH** don't extract information in any other language - just ignore it
 - **Every illustration, icon, chart, screenshot, or image MUST be replaced with {"image": true} at its exact location.**
 - Extract only the requested section, including all subsections, content, and visuals.
 - Do **not summarize, paraphrase, or skip content**.
